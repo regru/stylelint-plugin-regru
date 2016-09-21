@@ -1,0 +1,23 @@
+{
+  "name": "stylelint-plugin-regru",
+  "version": "1.0.0",
+  "description": "Stylelint plugin for REG.RU",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/regru/stylelint-plugin-regru.git"
+  },
+  "keywords": [
+    "stylelint",
+    "regru"
+  ],
+  "author": "Ivan Sobolev <destinct@yandex.ru> (https://github.com/DesTincT)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/regru/stylelint-plugin-regru/issues"
+  },
+  "homepage": "https://github.com/regru/stylelint-plugin-regru#readme"
+}
