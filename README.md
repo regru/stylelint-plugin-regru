@@ -2,6 +2,11 @@
 
 Stylelint rules for REG.RU project
 
+```
+npm i -g stylelint stylelint-plugin-regru
+```
+
+
 ## stylelint-plugin-regru/function-space-quotes-inside
 
 Add exception for `()` parens which contains ONLY string expression like:
