@@ -1,18 +1,29 @@
-var stylelint = require("stylelint")
-var ruleName = "stylelint-plugin-regru/function-space-quotes-inside"
+var stylelint                = require("stylelint"),
+    ruleName                 = "stylelint-plugin-regru/function-space-quotes-inside",
+    valueParser              = require("postcss-value-parser"),
+    declarationValueIndex    = require("../stylelint/dist/utils/declarationValueIndex").default,
+    isSingleLineString       = require("../stylelint/dist/utils/isSingleLineString").default,
+    isStandardSyntaxFunction = require("../stylelint/dist/utils/isStandardSyntaxFunction").default,
+    report                   = stylelint.utils.report,
+    ruleMessages             = stylelint.utils.ruleMessages,
+    validateOptions          = stylelint.utils.validateOptions;
 
-stylelint.utils.ruleMessages(ruleName, {
+const messages = ruleMessages(ruleName, {
   expectedOpening: "Expected single space after \"(\"",
   rejectedOpening: "Unexpected whitespace after \"(\"",
   expectedClosing: "Expected single space before \")\"",
   rejectedClosing: "Unexpected whitespace before \")\"",
-  expectedOpeningSingleLine: "Expected single space after \"(\" in a single-line function",
-  rejectedOpeningSingleLine: "Unexpected whitespace after \"(\" in a single-line function",
-  expectedClosingSingleLine: "Expected single space before \")\" in a single-line function",
-  rejectedClosingSingleLine: "Unexpected whitespace before \")\" in a single-line function",
+  expectedOpeningSingleLine:        "Expected single space after \"(\" in a single-line function",
+  expectedOpeningSingleLineString:  "Expected single space after \"(\" in a single-line function with STRING param",
+  rejectedOpeningSingleLine:        "Unexpected whitespace after \"(\" in a single-line function",
+  rejectedOpeningSingleLineString:  "Unexpected whitespace after \"(\" in a single-line function with STRING param",
+  expectedClosingSingleLine:        "Expected single space before \")\" in a single-line function",
+  expectedClosingSingleLineString:  "Expected single space before \")\" in a single-line function with STRING param",
+  rejectedClosingSingleLine:        "Unexpected whitespace before \")\" in a single-line function",
+  rejectedClosingSingleLineString:  "Unexpected whitespace before \")\" in a single-line function with STRING param",
 })
 
-var myPluginRule = stylelint.createPlugin(ruleName, function(primaryOption, secondaryOptionObject) {
+module.exports = stylelint.createPlugin(ruleName, function(expectation, secondaryOptionObject) {
   return function(root, result) {
     const validOptions = validateOptions(result, ruleName, {
       actual: expectation,
@@ -43,49 +54,100 @@ var myPluginRule = stylelint.createPlugin(ruleName, function(primaryOption, seco
         // Check opening ...
 
         const openingIndex = valueNode.sourceIndex + valueNode.value.length + 1
+        var ruleApplied = false;
 
-        if (expectation === "always" && valueNode.before !== " ") {
-          complain(messages.expectedOpening, openingIndex)
-        }
-
-        if (expectation === "never" && valueNode.before !== "") {
-          complain(messages.rejectedOpening, openingIndex)
-        }
-
-        if (isSingleLine && expectation === "always-single-line" && valueNode.before !== " ") {
-          complain(messages.expectedOpeningSingleLine, openingIndex)
-        }
-
-        if (isSingleLine && expectation === "never-single-line" && valueNode.before !== "") {
-          complain(messages.rejectedOpeningSingleLine, openingIndex)
-        }
 
         if (isSingleLine && expectation === "always-single-line-quotes") {
-          console.log(valueNode);
-          //complain(messages.rejectedOpeningSingleLine, openingIndex)
+
+          if ( valueNode.nodes.length == 1 && valueNode.nodes[0].type === 'string' ) {
+
+            if ( valueNode.before !== " " ) {
+              complain(messages.expectedOpeningSingleLineString, openingIndex);
+            }
+
+            ruleApplied = true;
+          }
         }
 
+        if (isSingleLine && expectation === "never-single-line-quotes") {
 
+          if ( valueNode.nodes.length == 1 && valueNode.nodes[0].type === 'string' ) {
+
+            if ( valueNode.before !== "" ) {
+              complain(messages.rejectedOpeningSingleLineString, openingIndex);
+            }
+
+            ruleApplied = true;
+          }
+        }
+
+        if ( !ruleApplied ) {
+          if (expectation === "always" && valueNode.before !== " ") {
+            complain(messages.expectedOpening, openingIndex)
+          }
+
+          if (expectation === "never" && valueNode.before !== "") {
+            complain(messages.rejectedOpening, openingIndex)
+          }
+
+          if (isSingleLine && (expectation === "always-single-line" || expectation === "never-single-line-quotes") && valueNode.before !== " ") {
+            complain(messages.expectedOpeningSingleLine, openingIndex)
+          }
+
+          if (isSingleLine && (expectation === "never-single-line" || expectation === "always-single-line-quotes") && valueNode.before !== "") {
+            complain(messages.rejectedOpeningSingleLine, openingIndex)
+          }
+        }
 
         // Check closing ...
 
         const closingIndex = valueNode.sourceIndex + functionString.length - 2
 
-        if (expectation === "always" && valueNode.after !== " ") {
-          complain(messages.expectedClosing, closingIndex)
+        ruleApplied = false;
+
+        if (isSingleLine && expectation === "always-single-line-quotes") {
+
+          if ( valueNode.nodes.length == 1 && valueNode.nodes[0].type === 'string' ) {
+
+            if ( valueNode.after !== " " ) {
+              complain(messages.expectedClosingSingleLineString, closingIndex);
+            }
+
+            ruleApplied = true;
+          }
         }
 
-        if (expectation === "never" && valueNode.after !== "") {
-          complain(messages.rejectedClosing, closingIndex)
+        if (isSingleLine && expectation === "never-single-line-quotes") {
+
+          if ( valueNode.nodes.length == 1 && valueNode.nodes[0].type === 'string' ) {
+
+            if ( valueNode.after !== "" ) {
+              complain(messages.rejectedClosingSingleLineString, closingIndex);
+            }
+
+            ruleApplied = true;
+          }
         }
 
-        if (isSingleLine && expectation === "always-single-line" && valueNode.after !== " ") {
-          complain(messages.expectedClosingSingleLine, closingIndex)
+
+        if ( !ruleApplied ) {
+          if (expectation === "always" && valueNode.after !== " ") {
+            complain(messages.expectedClosing, closingIndex)
+          }
+
+          if (expectation === "never" && valueNode.after !== "") {
+            complain(messages.rejectedClosing, closingIndex)
+          }
+
+          if (isSingleLine && (expectation === "always-single-line" || expectation === "never-single-line-quotes") && valueNode.after !== " ") {
+            complain(messages.expectedClosingSingleLine, closingIndex)
+          }
+
+          if (isSingleLine && (expectation === "never-single-line" || expectation === "always-single-line-quotes") && valueNode.after !== "") {
+            complain(messages.rejectedClosingSingleLine, closingIndex)
+          }
         }
 
-        if (isSingleLine && expectation === "never-single-line" && valueNode.after !== "") {
-          complain(messages.rejectedClosingSingleLine, closingIndex)
-        }
       })
 
       function complain(message, offset) {
