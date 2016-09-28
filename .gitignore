@@ -1,0 +1,7 @@
+node_modules/*
+bower_components/*
+
+.DS_Store
+npm-debug.log
+.stylelintrc
+style.css
