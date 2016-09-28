@@ -1,8 +1,0 @@
-{
-  "plugins": [
-    "stylelint-plugin-regru"
-  ],
-  "rules": {
-    "stylelint-plugin-regru/function-space-quotes-inside": "never-single-line-quotes"
-  }
-}
